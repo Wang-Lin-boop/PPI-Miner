@@ -1,6 +1,6 @@
 Usage
 ---
-Use `Script -h` to show the usage of 3DMotif-Dock and GetPDB.
+Use `3DMotif-Dock -h` or `GetPDB -h` to show the usage of `3DMotif-Dock` and `GetPDB`.
 
 To using `GetPDB`, you can refer the [GetPDB](https://github.com/Wang-Lin-boop/GetPDB);
 
