@@ -1,4 +1,10 @@
 #!/bin/bash
+#########################################################################
+# 3DMotif-Dock, Version 1.0.0
+# 2021, ShanghaiTech University, Wang Lin
+# Email: wanglin3@shanghaitech.edu.cn
+#########################################################################
+
 function help(){
 cat<<HELP
 
