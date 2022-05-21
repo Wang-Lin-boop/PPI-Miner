@@ -1,0 +1,300 @@
+#!/bin/bash
+#########################################################################
+# 2DMotif-Dock, Version 1.3.0
+# 2021, ShanghaiTech University, Wang Lin
+# Email: wanglin3@shanghaitech.edu.cn
+#########################################################################
+
+export CPUnum=40
+export msa_len=8
+export database=${Human_Disorder_Sequences}  # Human_Disorder_Sequences.fasta, don't contains any ":" or " " in fasta title!
+export percentage=70
+export relax_b=false
+export rosetta_version=mpi
+export Table_input=false
+export Target_ChainName="B"
+
+function post_profit(){
+    fasta=$1
+    title=`echo $2 | awk '{print $1}'`
+    start=`echo $2 | awk '{print $2}'`
+    ((start-=1))
+    profit_txt=$2
+    msa_len=$3
+    seq=`grep -A 1 "$title" $fasta | tail -n 1 `
+    echo "${seq:${start}:${msa_len}}  ${profit_txt}"
+};export -f post_profit
+
+function parse_ResName(){
+  three_letter_ResName=$1
+  case ${three_letter_ResName} in 
+    GLY)
+      echo -n "G";;
+    ALA)
+      echo -n "A";;
+    VAL)
+      echo -n "V";;
+    ILE)
+      echo -n "I";;
+    LEU)
+      echo -n "L";;
+    PHE)
+      echo -n "F";;
+    TRP)
+      echo -n "W";;
+    TYR)
+      echo -n "Y";;
+    GLU)
+      echo -n "E";;
+    ASP)
+      echo -n "D";;
+    ARG)
+      echo -n "R";;
+    LYS)
+      echo -n "K";;
+    HIS)
+      echo -n "H";;
+    CYS)
+      echo -n "C";;
+    MET)
+      echo -n "M";;
+    PRO)
+      echo -n "P";;
+    THR)
+      echo -n "T";;
+    SER)
+      echo -n "S";;
+    GLN)
+      echo -n "Q";;
+    ASN)
+      echo -n "N";;
+  esac
+};export -f parse_ResName
+
+function ddG_mut_run(){
+  mutate_seq=`echo $1 | awk '{print $1}'`
+  title=`echo $1 | awk '{print $2}'`
+  mutate_line=$1
+cat << MUT > ${title}--${mutate_seq}.mutfile
+total ${motif_total_res}
+${motif_total_res}
+MUT
+  for ((posti=1; posti <= ${motif_total_res}; posti+=1));do
+    ((res_number=receptor_total_res+posti))
+    ((motif_seq_number=posti-1))
+    echo "${motif_seq:${motif_seq_number}:1} ${res_number} ${mutate_seq:${motif_seq_number}:1}" >> ${title}--${mutate_seq}.mutfile
+  done
+  $rosetta_app/cartesian_ddg.${rosetta_version}.linuxgccrelease -database $rosetta_db -in:file:s ${complex} -ddg:mut_file ${title}--${mutate_seq}.mutfile -ddg:iterations 12 -force_iterations false -ddg::score_cutoff 1.0 -ddg::cartesian -ddg::dump_pdbs true -fa_max_dis 9.0 -score:weights ref2015_cart -ddg::legacy false -mute all -ignore_zero_occupancy false -mut_only -interface_ddg 1
+  mutate_total_score=`grep " MUT_" ${title}--${mutate_seq}.ddg | grep ^COMPLEX | tail -n 1 | awk '{print $4}'`
+  ddG_score=`awk 'BEGIN{print "'"${mutate_total_score}"'" - "'"$WT_total_score"'"}'`
+  echo "NOTE: the rosetta energy score of ${mutate_seq}: ${mutate_total_score} and its ddG ${ddG_score}"
+  echo "${mutate_total_score}  ${ddG_score}  ${mutate_line}" >> ../$(basename ${Table%%.tsv})-ddG.sc
+};export -f ddG_mut_run
+
+function help(){
+cat<<HELP
+
+Usage: 2DMotif-Dock [OPTION] <parameter>
+
+Note: Make sure profit\prophecy in your \$PATH!
+
+MSAprofit or Pattern parameter:
+  -i	  Your Interested sequences library in a fasta. <${database}>
+           Warning: don't contains any ":" or " " in fasta title!
+  -p    Percentage cutoff of MSAprofit. <70>
+  -m    A MSA fasta file to define a sequence motif.
+          NOTE: MSA Length must be equal to the motif residue number in complex strcuture!
+  -M    Sequence pattern to define a seqence motif. such as "..[PG]EE[TS]."
+          .     : arbitrary residue.
+          [PG]  : arbitrary P or G
+          E     : must E.
+  -t    Input a Table to ddG calculation. Instead of -m and -i.
+            Table Format:  <Motif-Seq>  <Title>  <other...>
+
+Structure parameter:
+  -r    A complex strcuture pdb file Corresponding to your motif and receptor!
+  -c    The chainname of your sequence motif in Complex structure (-r)! <B>
+          NOTE: Must be the second protein chain except HETATM! 
+          NOTE: Residue number must be equal to the MSA length!
+          NOET: If any HETATM record included, all of them should in the last chain.
+  -q    relax before mutate, default is false.
+
+Rosetta parameter:
+  -n    The Max number of CPU threads available for this job, default is 40.
+  -a    Path to Rosetta app, defalut is \$rosetta_app <$rosetta_app>
+  -b    Path to Rosetta db, defalut is \$rosetta_db <$rosetta_db>
+  -v    Rosetta version, static or mpi. <mpi>
+
+Thank you for your using, If you found any problem, Please contact wanglin3@shanghaitech.edu.cn.
+HELP
+}
+
+while getopts ":hm:M:i:r:c:p:n:a:b:v:qt:" opt
+do
+  case $opt in
+    h)
+        help
+        exit;;
+    m)
+        msa_input=true
+        msa=`readlink -f $OPTARG`;;
+    M)
+        seq_patt_input=true
+        seq_pattern=$OPTARG;;
+    i)
+        database=`readlink -f $OPTARG`;;
+    r)
+        export complex=`readlink -f $OPTARG`;;
+    c)
+        Target_ChainName=$OPTARG;;
+    p)
+        percentage=$OPTARG;;
+    q)
+        relax_b=true;;
+    t)
+        Table_input=true
+        Table=$OPTARG;;
+    n)
+        CPUnum=$OPTARG;;
+    a)
+        rosetta_app=$OPTARG;;
+    b)
+        rosetta_db=$OPTARG;;
+    v)
+        rosetta_version=$OPTARG;;
+    ?)
+        echo ""
+        echo "Error: Do not use undefined options."
+        echo ""
+        help
+        exit;;
+    esac
+done
+
+##  Complex checking and get motif sequence
+#######################################
+complex_total_res=`grep -E "^ATOM|^HETATM" $complex | grep -c "[' ',0-9][' ',0-9][' ',0-9]CA  [A-Z][A-Z]" ` ; echo "NOTE: ${complex_total_res} residues in complex structure."
+export motif_total_res=`grep -E "^ATOM|^HETATM" $complex | grep "[' ',0-9][' ',0-9][' ',0-9]CA  [A-Z][A-Z]" | grep -c " ${Target_ChainName}[' ',0-9][' ',0-9][' ',0-9][0-9]"` ; echo "NOTE: ${motif_total_res} residues in motif chain ${Target_ChainName}!"
+export receptor_total_res=`grep -E "^ATOM|^HETATM" $complex | grep "[' ',0-9][' ',0-9][' ',0-9]CA  [A-Z][A-Z]" | grep -c -v " ${Target_ChainName}[' ',0-9][' ',0-9][' ',0-9][0-9]"` ; echo "NOTE: ${receptor_total_res} residues in other component."
+((motif_recep_total_res=motif_total_res+receptor_total_res))
+if [ $complex_total_res != ${motif_recep_total_res} ];then
+  echo "Error: Complex total residue number is not equal to motif+receptor residue number!"
+  exit
+fi
+export motif_seq= ; for residue in `grep -E "^ATOM|^HETATM" $complex | grep "[' ',0-9][' ',0-9][' ',0-9]CA  [A-Z][A-Z]" | grep " ${Target_ChainName}[' ',0-9][' ',0-9][' ',0-9][0-9]" | sort -nk 6 | awk '{print $4}'`;do
+    motif_seq=${motif_seq}`parse_ResName ${residue}`
+done
+if [ ${motif_total_res} == ${#motif_seq} ];then
+  echo "NOTE: Motif Sequence: ${motif_seq}."
+else
+  echo "Error: Unknown error, please contact wanglin3@shanghaitech.edu.cn."
+  exit
+fi
+#######################################
+
+## Complex Relaxing
+#######################################
+if [ $relax_b == true ]; then
+cat << EOF >> cart2.script
+switch:cartesian
+repeat 2
+ramp_repack_min 0.02  0.01     1.0  50
+ramp_repack_min 0.250 0.01     0.5  50
+ramp_repack_min 0.550 0.01     0.0 100
+ramp_repack_min 1     0.00001  0.0 200
+accept_to_best
+endrepeat
+EOF
+  echo "NOTE: Relaxing the input complex structure!"
+  mkdir -p Rosetta_Process
+  $rosetta_app/relax.${rosetta_version}.linuxgccrelease -database ${rosetta_db} -in:file:s ${complex} -out:file:scorefile Rosetta_Porcess_relax_score.sc -out:path:pdb Rosetta_Process/ -ex1 -ex2aro -ignore_zero_occupancy false -no_nstruct_label -use_input_sc -relax:cartesian -score:weights ref2015_cart -relax:min_type lbfgs_armijo_nonmonotone -relax:script cart2.script -fa_max_dis 9.0 -out:nstruct 1 -mute all 
+  export complex=`readlink -f Rosetta_Process/$(basename ${complex})`
+fi
+#######################################
+
+if [ $Table_input == true ];then
+    export Table=`readlink -f ${Table}`
+else
+##  MSA to PFM to profit matching to table
+#######################################
+if [ ${msa_input} ] && [ ${msa_input} == true ];then
+first_seq=true
+msa_len=
+for seq in `grep -v "^>" ${msa}`;do
+  msa_len=${#seq}
+  if [ ${first_seq} == false ];then
+    if [ $msa_len != $old_msa_len ];then
+      echo "Error: MSA is not Aligned!"
+      exit
+    fi
+  fi
+  old_msa_len=${msa_len}
+  first_seq=false
+done
+if [ ${motif_total_res} != ${msa_len} ];then
+  echo "Error: MSA length is not equal to motif residue number!"
+  exit
+fi
+( echo "${msa}"; echo "F"; echo "pfm-matrix"; echo "${percentage}"; echo "prophecy.out" ) | prophecy
+( echo "prophecy.out"; echo "${database}"; echo "profit.out" ) | profit
+((msa_len+=1)); tail -n +4 profit.out | parallel -j $CPUnum post_profit ${database} {} ${msa_len} >> $(basename ${msa%%.fasta})-MSAprofit
+export Table=`readlink -f $(basename ${msa%%.fasta})-MSAprofit.tsv`
+echo "
+NOTE: the PFM search results were stored in $(basename ${msa%%.fasta})-MSAprofit.tsv !"
+fi
+#######################################
+## Seqence pattern for motif matching to table
+#######################################
+if [ ${seq_patt_input} == true ];then
+  for line in `cat ${database}`;do
+    if [ ${line:0:1} == ">" ];then
+      echo -e "\n${line: 1}#\c" >> $(basename ${database%%.fasta})-line.seq
+    else
+      echo -n "${line}" >> $(basename ${database%%.fasta})-line.seq
+    fi
+  done
+  for match_line in `grep -E ${seq_pattern} $(basename ${database%%.fasta})-line.seq`;do
+    sequence_name=`echo ${match_line} | awk -F# '{print $1}'`
+    for sequence_matched in `echo ${match_line} | grep -E ${seq_pattern} -o`;do
+      if [[ ${sequence_matched} =~ [-,0-9,_,a-z,'#',%,?] ]];then
+        continue
+      fi
+      echo "${sequence_matched}  ${sequence_name}" >> Matched-Sequence_Patterns.tsv
+    done
+  done
+  echo "
+NOTE: the sequence pattern search results were stored in Matched-Sequence_Patterns.tsv !"
+if [ ${Table} ];then
+  cat ${Table} Matched-Sequence_Patterns.tsv > all_cands_for_${msa%%.fasta}-MSA_and_Sequence-Patterns.tsv
+  export Table=`readlink -f all_cands_for_${msa%%.fasta})-MSA_and_Sequence-Patterns.tsv`
+else
+  export Table=`readlink -f Matched-Sequence_Patterns.tsv`
+fi
+fi
+#######################################
+fi
+
+##  WT scoring
+#######################################
+cat << WT >> WT.mutfile
+total 0
+0
+WT
+if [ ! -f WT.ddg ];then
+$rosetta_app/cartesian_ddg.${rosetta_version}.linuxgccrelease -database $rosetta_db -s ${complex} -ddg:iterations 12  -force_iterations false -ddg::score_cutoff 1.0 -ddg::cartesian -fa_max_dis 9.0 -score:weights ref2015_cart -ddg::legacy false -mute all -ddg::mut_file WT.mutfile -ignore_zero_occupancy false -interface_ddg 1
+fi
+export WT_total_score=`grep ^COMPLEX WT.ddg | tail -n 1 | awk '{print $4}'`
+echo "NOTE: the rosetta energy score of native structure: ${WT_total_score}"
+#######################################
+
+## Table to ddG
+#######################################
+mkdir -p ddG_running
+echo "total_score  ddG  Motif-Seq  Title  Percentage" > $(basename ${Table%%.tsv})-ddG.sc
+cd ddG_running
+cat ${Table} | parallel -j $CPUnum ddG_mut_run {}
+cd ..
+echo "NOTE: check results in $(basename ${Table%%.tsv})-ddG.sc !"
+#######################################
+
+echo "Done!"

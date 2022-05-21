@@ -1,6 +1,6 @@
 #!/bin/bash
 #########################################################################
-# 3DMotif-Dock, Version 1.0.0
+# 3DMotif-Dock, Version 1.1.0
 # 2021, ShanghaiTech University, Wang Lin
 # Email: wanglin3@shanghaitech.edu.cn
 #########################################################################
@@ -8,20 +8,20 @@
 function help(){
 cat<<HELP
 
-Usage: MotifDock [OPTION] <parameter>
+Usage: 3DMotif-Dock [OPTION] <parameter>
 
 Example: 
 1) PDS library Geneation:
-Motif-Dock -i INPUT_PDB_LIB -n 40 -1
+3DMotif-Dock -i INPUT_PDB_LIB -n 40 -1
 ## This step will return a INPUT_PDB_LIB-Index file.
 
 2) Motif Docking:
 ## for flexible motif.
-Motif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 1.0 -3 
+3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 1.0 -3 
 ## for stable motif.
-Motif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6 -3 
+3DMotif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6 -3 
 ## Normal Solution, it takes a lot of time.
-Motif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.8
+3DMotif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.8
 
 Note: Make sure julia\MAESTER\Parallel\Python3 in your \$PATH!
 
@@ -37,12 +37,17 @@ Input parameter:
   -r    A receptor strcuture Corresponding to your motif!
   -d    RMSD cutoff for matching.
   -c    Set a chain name of target, default is B.
+  -k    Don't change the chain name of target proteins, but set receptor chain to "Z".
+            NOTE: it is useful for multiple chain PDB library.
+  -f    Set a clash_score_cutoff to the filter for ugly PPI complex, or set to "unlimited". <1.64>
+            NOTE: 1.64, 2.44, 6.20. More little, more sensitive to clash.
   -q    How many top complexes will be relax. <500>
   -g    Motif to match with a gap in range. <"5-20">
 
   -n    The Max number of CPU threads available for this job, default is 40.
   -a    Path to Rosetta app, defalut is \$rosetta_app
-  -b    Path to Rosetta app, defalut is \$rosetta_db
+  -b    Path to Rosetta db, defalut is \$rosetta_db
+  -v    Rosetta version, static or mpi. <mpi>
   -l    Input a PDS index list from MAESTER.
 
 Control Parameter:
@@ -90,7 +95,12 @@ Threads.@threads for inputpdb in readdir(singlechainDB)
 end
 JULIA
     mkdir -p $OUTPUTlib
-    (echo $OriginLib; echo $OUTPUTlib) | julia -p $CPUnum ParseChain.jl
+    if [ ${set_receptor_chainname} == true ];then
+        ls ${OriginLib} | parallel -j ${CPUnum} cp ${OriginLib}/{} ${OUTPUTlib}/
+    else
+        (echo $OriginLib; echo $OUTPUTlib) | julia -p $CPUnum ParseChain.jl
+    fi
+    rm ParseChain.jl
     CurrentWorkdir=$PWD
     cd $OUTPUTlib
     ls | parallel -j $CPUnum createPDS --pdb {} --seqID 0.98 --cleanPDB --type target
@@ -100,6 +110,7 @@ JULIA
 
 function ex_Seq(){
     PDB_OUT_dir=$1
+    grep -v "H  $" ${Motifpdb} > motif_pdb_to_ex_seq.pdb
 cat<< SEQ > ex_seq.jl
 using BioStructures
 
@@ -155,7 +166,7 @@ function get_decoy_motif(decoy_structure,decoy_motif_region,decoy_motif_length,d
 end
 
 function main()
-    decoy_pdb="${Motifpdb}"
+    decoy_pdb="motif_pdb_to_ex_seq.pdb"
     template_library="${PDB_OUT_dir}"
     decoy_structure = read(decoy_pdb, PDB)
     out_fasta = open("$(basename ${PDB_OUT_dir}).fasta", "w")
@@ -185,6 +196,7 @@ end
 main()
 SEQ
 julia -p $CPUnum ex_seq.jl
+rm ex_seq.jl
 }
 
 PDBinputPath="INPUT"
@@ -196,12 +208,16 @@ Matching="true"
 JdRefine="true"
 InterScore="true"
 relaxnum="1"
+Relax="true"
 Target_ChainName="B"
 Relax_Num=500
 with_gap=false
 gap_len="5-20"
+rosetta_version=mpi
+set_receptor_chainname=false
+clash_score_cutoff=1.64
 
-while getopts ":hm:i:r:d:n:a:b:p:l:c:q:w1234g:" opt
+while getopts ":hm:i:r:d:n:a:b:p:l:c:q:w1234g:v:kf:" opt
 do
   case $opt in
     h)
@@ -223,15 +239,21 @@ do
         Relax_Num=$OPTARG;;
     n)
         CPUnum=$OPTARG;;
+    k)
+        set_receptor_chainname=true;;
     d)
         rmsdCutoff=$OPTARG;;
     g)
         with_gap=true
         gap_len=$OPTARG;;
+    f)
+        clash_score_cutoff=$OPTARG;;
     a)
         rosetta_app=$OPTARG;;
     b)
         rosetta_db=$OPTARG;;
+    v)
+        rosetta_version=$OPTARG;;
     1)
         Matching="false"
         JdRefine="false"
@@ -254,17 +276,21 @@ do
 done
 
 jobbasename=`echo "$(basename ${PDBinputPath})-$(basename ${Motifpdb%%.pdb})"`
-date >> $jobbasename.log
-echo -e "Note: Parsing Input PDB library......\n" >> $jobbasename.log
+date #sdout
+echo -e "STEP: Parsing Input PDB library......\n" #sdout
 if [ "$PDBinput"x == "true"x ];then
     PDSlist=$(basename ${PDBinputPath})-Index
     ParseChainLib ${PDBinputPath} $(basename ${PDBinputPath})-Set-to-$Target_ChainName $PDSlist >> $jobbasename.ParseChain.log;
 elif [ "$PDSinput"x == "true"x ];then
-    PDSlist=$PDSlist
+    if [ -f $PDSlist ];then
+        PDSlist=$PDSlist
+    else
+        echo "ERROR: $PDSlist not found."
+        exit
+    fi
 else
     echo "Error: a series pdb files or a PDS index file must be input."; exit
 fi
-
 
 #Master Matching and Complex Generation
 function catComplex(){
@@ -290,15 +316,51 @@ function matchingPDS(){
 };export -f matchingPDS
 
 if [ "$Matching"x == "true"x ];then
-    date >> $jobbasename.log
-    echo -e "Note: creating Input Motif PDS......\n" >> $jobbasename.log
-    createPDS --pdb $Motifpdb --type query --cleanPDB >> $jobbasename.log
+    date #sdout
+    echo -e "STEP: creating Input Motif PDS......\n" #sdout
+    createPDS --pdb $Motifpdb --type query --cleanPDB #sdout
     cp ${Motifpdb%%.pdb}.pds ./$(basename ${Motifpdb%%.pdb}).pds
-    date >> $jobbasename.log
-    echo -e "Note: Master Motif Matching......\n" >> $jobbasename.log
-    mkdir -p $jobbasename-complex >> $jobbasename.log
-    grep -E "^ATOM|^HETATM|^CONECT" $Receptor > ${jobbasename}-receptor.pdb
+    date #sdout
+    echo -e "STEP: Master Motif Matching......\n" #sdout
+    mkdir -p $jobbasename-complex #sdout
+    if [ ${set_receptor_chainname} == true ];then
+        cat << JULIA > ParseChain.jl
+using PDBTools
+function set_receptor_Chainname!(chain)
+    for atom in chain
+        atom.chain = "Z"
+    end
+    chain
+end
+function setchainname(inputpdb::AbstractString)
+    try
+        chain = readPDB("\$inputpdb")
+        set_receptor_Chainname!(chain)
+        writePDB(chain,"${jobbasename}-receptor.pdb")
+        println("success: \$inputpdb")
+    catch e0
+        println("error: \$inputpdb")
+    end
+end
+setchainname("$Receptor")
+JULIA
+        julia ParseChain.jl
+        receptor_chain_name="Z"
+    else
+        grep -E "^ATOM|^HETATM|^CONECT" $Receptor > ${jobbasename}-receptor.pdb
+        export receptor_chain_name= 
+        for chain_name in `grep -E "^ATOM|^HETATM" ${jobbasename}-receptor.pdb | grep "[' ',0-9][' ',0-9][' ',0-9]CA  [A-Z][A-Z]" | awk '{print $5}' | sort | uniq`;do
+            receptor_chain_name=${receptor_chain_name}${chain_name}
+        done 
+    fi
     cat $PDSlist| parallel -j $CPUnum matchingPDS {} {/.}-MasterOUT $(basename ${Motifpdb%%.pdb}).pds $jobbasename.master.log $rmsdCutoff ${jobbasename}-receptor.pdb $jobbasename-complex
+    complex_number=`ls $jobbasename-complex | wc -l`
+    echo -e "Done: Motif Matching, ${complex_number} were found.\n"
+    echo -e "Log: Motif Matching, $jobbasename.master.log\n"
+    if [ $complex_number == 0 ];then
+        exit
+    fi
+    rm ParseChain.jl
 fi
 
 function link_sc_seq(){
@@ -308,14 +370,54 @@ function link_sc_seq(){
     echo "$line  $sequence"
 };export -f link_sc_seq
 
-#Rosetta Jd_2
+function clash_filter(){
+    if [ ${set_receptor_chainname} == true ];then
+        ligand_chain_name_in_filter="Z"
+    else
+        ligand_chain_name_in_filter=$Target_ChainName
+    fi
+cat<<EOF > clash_filter.jl
+using BioStructures
+pdblibrary = "$1"
+clash_cutoff = 2.5
+clash_score_cutoff = ${clash_score_cutoff}  # 1.64 is a tight cutoff, 2.44 maybe better. 
+function check_clash(pdbfile)
+    structure = read(pdbfile, PDB)
+    ligand = collect(structure["${ligand_chain_name_in_filter}"])
+    receptor = collectchains(structure, chain -> chainid(chain) != "${ligand_chain_name_in_filter}")
+    receptor_hv = collectatoms(receptor, heavyatomselector)
+    ligand_cb = collectatoms(ligand, cbetaselector)
+    clash_score = 0
+    for residue in ligand_cb
+        frag_dist::Float64 = distance(residue, receptor_hv)
+        ( frag_dist <= clash_cutoff ) && ( clash_score = clash_score + clash_cutoff/(frag_dist*frag_dist) )
+    end
+    (clash_score > clash_score_cutoff ) && println(pdbfile, "   ", clash_score)
+end
+Threads.@threads for pdbfilename in readdir(pdblibrary)
+    try
+        check_clash("\$pdblibrary/\$pdbfilename")
+    catch e0
+        println("\$pdblibrary/\$pdbfilename", "   Unknown Error: ", e0)
+    end
+end
+EOF
+    julia -p $CPUnum clash_filter.jl > $jobbasename.clash_filter.log
+    awk '{print $1}' $jobbasename.clash_filter.log | parallel -j $CPUnum rm {}
+    awk '$2=="Unknown Error"{print $1}' $jobbasename.clash_filter.log | parallel -j $CPUnum echo "Error: File cannot handle upon clash_filter, "{}
+}
+
+#Rosetta_Jd2
 if [ "$JdRefine"x == "true"x ];then
-    date >> $jobbasename.log
-    echo -e "Note: Complexes are being refined......\n" >> $jobbasename.log
-    mkdir -p $jobbasename-Jd2-OUT >> $jobbasename.log
-    ls $jobbasename-complex | parallel -j $CPUnum $rosetta_app/score_jd2.static.linuxgccrelease -database $rosetta_db -in:file:s $jobbasename-complex/{} -out:file:scorefile $jobbasename-score_jd2.sc -out:path:pdb $jobbasename-Jd2-OUT -score:weights ref2015_cart -out:pdb -ex1 -ex2 -ignore_zero_occupancy false -in:ignore_unrecognized_res true -treat_residues_in_these_chains_as_separate_chemical_entities "Z" -no_nstruct_label >> $jobbasename.Jd2.log
-    ls $jobbasename-Jd2-OUT | parallel -j $CPUnum $rosetta_app/InterfaceAnalyzer.static.linuxgccrelease -s $jobbasename-Jd2-OUT/{} -tracer_data_print false -out:file:score_only $jobbasename-Jd2_Interface_Score.sc -add_regular_scores_to_scorefile true -sasa_calculator_probe_radius 1.4 -atomic_burial_cutoff 0.01 -interface A_${Target_ChainName} -read_only_ATOM_entries true -pack_separated true -score:weights ref2015_cart -no_nstruct_label true >> $jobbasename.Interface_score.log
-    ex_Seq $jobbasename-Jd2-OUT/ >> $jobbasename.log
+    date #sdout
+    echo -e "STEP: Run the Rosetta sctruture refinement......\n" #sdout
+    [ ${clash_score_cutoff} != "unlimited" ] && clash_filter $jobbasename-complex #sdout
+    complex_number=`ls $jobbasename-complex | wc -l`
+    echo -e "Done: Clash Filtering, ${complex_number} pass the clash_filter.\n"
+    mkdir -p $jobbasename-Jd2-OUT #sdout
+    ls $jobbasename-complex | parallel -j $CPUnum $rosetta_app/score_jd2.${rosetta_version}.linuxgccrelease -database $rosetta_db -in:file:s $jobbasename-complex/{} -out:file:scorefile $jobbasename-score_jd2.sc -out:path:pdb $jobbasename-Jd2-OUT -score:weights ref2015_cart -out:pdb -ex1 -ex2 -ignore_zero_occupancy false -in:ignore_unrecognized_res true -out:mute all -treat_residues_in_these_chains_as_separate_chemical_entities "Z" -no_nstruct_label # Score_Jd2
+    ls $jobbasename-Jd2-OUT | parallel -j $CPUnum $rosetta_app/InterfaceAnalyzer.${rosetta_version}.linuxgccrelease -s $jobbasename-Jd2-OUT/{} -tracer_data_print false -out:file:score_only $jobbasename-Jd2_Interface_Score.sc -add_regular_scores_to_scorefile true -out:mute all -sasa_calculator_probe_radius 1.4 -atomic_burial_cutoff 0.01 -interface ${receptor_chain_name}_${Target_ChainName} -read_only_ATOM_entries true -pack_separated true -score:weights ref2015_cart -no_nstruct_label true # Interface socre
+    ex_Seq $jobbasename-Jd2-OUT/ #sdout
     echo "FileName  MotifDock_Score  Complex_Repulsive  Interface_SASA_Total  dG_separated_Total  dG_separated/dSASAx100  dSASA_hphobic  Target_side_Score  Interface_unsat_Hbonds  Interface_Hbonds_Energy  dG_cross_Total  dG_cross/dSASAx100  Motif_Seq" > $jobbasename-JD2_interface_score_OUT.sc
     tail -n +3 $jobbasename-Jd2_Interface_Score.sc | awk '$28 != 0 {print $42,$19/1000+$5+$40/5,$19,$10,$7,$8,$9,$40,$12,$21,$5,$6}' | parallel -j $CPUnum link_sc_seq {} $jobbasename-Jd2-OUT.fasta >> $jobbasename-JD2_interface_score_OUT.sc
     awk '{print $42,$29,$7}' $jobbasename-Jd2_Interface_Score.sc | tail -n +2 | sort -nk 3 | head -n $Relax_Num >> $jobbasename.Jd2.out
@@ -323,19 +425,19 @@ fi
 
 #Rosetta_Relax
 if [ "$Relax"x == "true"x ];then
-    date >> $jobbasename.log
-    echo -e "Note: Relax and re-Scoring......\n" >> $jobbasename.log
-    mkdir -p $jobbasename-Jd2_Relax-OUT >> $jobbasename.log
-    awk '$2 != 0 {print $1}' $jobbasename.Jd2.out | parallel -j $CPUnum $rosetta_app/relax.static.linuxgccrelease -database $rosetta_db -in:file:s $jobbasename-Jd2-OUT/{}.pdb -out:file:scorefile $jobbasename-Jd2_relax_score.sc -out:path:pdb $jobbasename-Jd2_Relax-OUT -nstruct $relaxnum -ex1 -ex2aro -ignore_zero_occupancy false -score:weights ref2015_cart -relax:jump_move false -relax:bb_move true -relax:chi_move true -relax:fast -relax:constrain_relax_to_native_coords true -relax:coord_cst_stdev 0.1 -in:file:native $Receptor -no_nstruct_label >> $jobbasename.relax.log
-    ls $jobbasename-Jd2_Relax-OUT | parallel -j $CPUnum $rosetta_app/InterfaceAnalyzer.static.linuxgccrelease -s $jobbasename-Jd2_Relax-OUT/{} -tracer_data_print false -out:file:score_only $jobbasename-FINAL_Interface_Score.sc -add_regular_scores_to_scorefile true -pose_metrics::interface_cutoff 8.0 -sasa_calculator_probe_radius 1.4 -atomic_burial_cutoff 0.01 -interface A_${Target_ChainName} -read_only_ATOM_entries true -pack_input true -pack_separated true -score:weights ref2015_cart -no_nstruct_label true >> $jobbasename.Interface_Score_2.log
+    date #sdout
+    echo -e "STEP: Relax and re-Scoring......\n" #sdout
+    mkdir -p $jobbasename-Jd2_Relax-OUT #sdout
+    awk '$2 != 0 {print $1}' $jobbasename.Jd2.out | parallel -j $CPUnum $rosetta_app/relax.${rosetta_version}.linuxgccrelease -database $rosetta_db -in:file:s $jobbasename-Jd2-OUT/{}.pdb -out:file:scorefile $jobbasename-Jd2_relax_score.sc -out:path:pdb $jobbasename-Jd2_Relax-OUT -nstruct $relaxnum -ex1 -ex2aro -ignore_zero_occupancy false -score:weights ref2015_cart -relax:jump_move false -relax:bb_move true -relax:chi_move true -relax:fast -out:mute all -relax:constrain_relax_to_native_coords true -relax:coord_cst_stdev 0.1 -in:file:native $Receptor -no_nstruct_label # Relax
+    ls $jobbasename-Jd2_Relax-OUT | parallel -j $CPUnum $rosetta_app/InterfaceAnalyzer.${rosetta_version}.linuxgccrelease -s $jobbasename-Jd2_Relax-OUT/{} -tracer_data_print false -out:file:score_only $jobbasename-FINAL_Interface_Score.sc -add_regular_scores_to_scorefile true -pose_metrics::interface_cutoff 8.0 -sasa_calculator_probe_radius 1.4 -atomic_burial_cutoff 0.01 -out:mute all -interface ${receptor_chain_name}_${Target_ChainName} -read_only_ATOM_entries true -pack_input true -pack_separated true -score:weights ref2015_cart -no_nstruct_label true # Interface socre
     echo "FileName  MotifDock_Score  Complex_Repulsive  Interface_SASA_Total  dG_separated_Total  dG_separated/dSASAx100  dSASA_hphobic  Target_side_Score  Interface_unsat_Hbonds  Interface_Hbonds_Energy  dG_cross_Total  dG_cross/dSASAx100"> $jobbasename-FINAL_interface_score_OUT.sc
     tail -n +3 $jobbasename-FINAL_Interface_Score.sc | awk '$28 != 0 {print $42,$19/1000+$5+$40/5,$19,$19,$10,$7,$8,$9,$40,$12,$21,$5,$6}' | parallel -j $CPUnum link_sc_seq {} $jobbasename-Jd2-OUT.fasta >> $jobbasename-FINAL_interface_score_OUT.sc
 fi
 
-date >> $jobbasename.log
+date #sdout
 
 if [ -f ROSETTA_CRASH.log ]; then
     grep "0001.pdb" ROSETTA_CRASH.log | awk '{print $6}' | parallel -j 3 echo {/} >> CRASH_job
 fi
 
-echo "Note: All jobs are finished......" >> $jobbasename.log
+echo "STEP: All jobs were finished......" #sdout
