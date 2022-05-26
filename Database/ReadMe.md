@@ -1,9 +1,10 @@
 Database
 ====
 
-1. Decompress the zip file.
+1. Download and decompress the zip file.
 
 ```
+wget 
 unzip 3DMotif-Dock-pds-Library.zip
 ```
 
