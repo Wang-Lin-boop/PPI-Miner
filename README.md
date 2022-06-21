@@ -2,7 +2,7 @@
 A Structural-Based PPI Searching Pipeline for Human proteome
 
 Introduction
-======
+----
 
 
 ![image](https://user-images.githubusercontent.com/58931275/174751397-d529dfaf-f970-43f2-a0fe-0f3d99c006f7.png)
@@ -22,28 +22,28 @@ Figure. The designed pipeline of 3DMotif-Dock.
 
 
 Database
-=====
+----
 
 
 
 
 Installation
-=====
+----
 
 
 
 Usage of 2DMotif-Dock
-=====
+----
 
 
 Usage of 3DMotif-Dock
-=====
+----
 
 
 Citation
-=====
+----
 
 
 Acknowledgements
-=====
+----
 
