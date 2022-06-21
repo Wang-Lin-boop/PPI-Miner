@@ -4,7 +4,7 @@ Database
 1. Download and decompress the zip file.
 
 ```
-wget 
+wget https://bailab.siais.shanghaitech.edu.cn/service/3DMotif-Dock-pds-Library.zip
 unzip 3DMotif-Dock-pds-Library.zip
 ```
 
