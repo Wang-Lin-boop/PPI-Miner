@@ -10,16 +10,19 @@ A number of proteins can bind to the same receptor at the same site with similar
 ![**Figure 1. Kinds of PPI protein motifs.**](https://user-images.githubusercontent.com/58931275/174751397-d529dfaf-f970-43f2-a0fe-0f3d99c006f7.png)  
 **Figure 1. Kinds of PPI protein motifs.**  
 
-Database
-----
-
-
-
-
 Installation
 ----
+1. Install the dependent packages.  
 
+2. Download Motif-Dock and configure environment variables.  
 
+Database
+----
+1. Download the library of prepared human protein structures and disorder sequeneces.
+
+2. Use the 3DMotif-Dock to generate your own structure libraries.
+
+3. Use the scripts to generate your own disorder sequences libraries.
 
 Usage of 2DMotif-Dock
 ----
