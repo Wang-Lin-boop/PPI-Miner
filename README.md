@@ -36,6 +36,13 @@ add PDBTools # in Julia REPL
 exit()
 ```
 **2. Download Motif-Dock and configure environment variables.**   
+```
+git clone https://github.com/Wang-Lin-boop/Motif-Dock/scripts/
+cd Motif-Dock/scripts/
+echo "export PATH=${PWD}:\$PATH" >> ~/.bashrc
+source ~/.bashrc
+```
+
 
 Database
 ----
