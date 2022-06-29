@@ -12,9 +12,30 @@ A number of proteins can bind to the same receptor at the same site with similar
 
 Installation
 ----
-1. Install the dependent packages.  
+**1. Install the dependent packages.**  
 
-2. Download Motif-Dock and configure environment variables.  
+a. Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
+```
+echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
+echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
+echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
+```  
+
+b. Intsall Julia and related packages.   
+
+```  
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
+tar zxvf julia-1.5.3-linux-x86_64.tar.gz  
+cd julia-1.5.3/bin
+echo "export PATH=${PWD}:\$PATH" >> ~/.bashrc
+source ~/.bashrc
+julia
+] # in Julia REPL
+add BioStructures # in Julia REPL
+add PDBTools # in Julia REPL
+exit()
+```
+**2. Download Motif-Dock and configure environment variables.**   
 
 Database
 ----
