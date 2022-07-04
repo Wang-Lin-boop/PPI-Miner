@@ -75,13 +75,97 @@ Finally, three environment variables will be added to your ``~/.bashrc`` file.
 
 **3. Use the scripts to generate your own disorder sequences libraries.**
 
+Please refer to [AlphaFold Processing](https://github.com/Wang-Lin-boop/AlphaFoldDB_Processing).   
+
 Usage of 2DMotif-Dock
 ----
 
+Run the `2DMotif-Dock -h` to show the help information of 2DMotif-Dock.
+```
+Usage: 2DMotif-Dock [OPTION] <parameter>
+
+Note: Make sure profit\prophecy in your $PATH!
+
+MSAprofit or Pattern parameter:
+  -i      Your Interested sequences library in a fasta. <>
+           Warning: don't contains any ":" or " " in fasta title!
+  -p    Percentage cutoff of MSAprofit. <70>
+  -m    A MSA fasta file to define a sequence motif.
+          NOTE: MSA Length must be equal to the motif residue number in complex strcuture!
+  -M    Sequence pattern to define a seqence motif. such as "..[PG]EE[TS]."
+          .     : arbitrary residue.
+          [PG]  : arbitrary P or G
+          E     : must E.
+  -t    Input a Table to ddG calculation. Instead of -m and -i.
+            Table Format:  <Motif-Seq>  <Title>  <other...>
+
+Structure parameter:
+  -r    A complex strcuture pdb file Corresponding to your motif and receptor!
+  -c    The chainname of your sequence motif in Complex structure (-r)! <B>
+          NOTE: Must be the second protein chain except HETATM!
+          NOTE: Residue number must be equal to the MSA length!
+          NOET: If any HETATM record included, all of them should in the last chain.
+  -q    relax before mutate, default is false.
+
+Rosetta parameter:
+  -n    The Max number of CPU threads available for this job, default is 40.
+  -a    Path to Rosetta app, defalut is $rosetta_app </public/home/wanglin3/software/rosetta3.13-mpi/main/source/bin>
+  -b    Path to Rosetta db, defalut is $rosetta_db </public/home/wanglin3/software/rosetta3.13-mpi/main/database>
+  -v    Rosetta version, static or mpi. <mpi>
+```
 
 Usage of 3DMotif-Dock
 ----
 
+Run the `3DMotif-Dock -h` to show the help information of 3DMotif-Dock.
+```
+Usage: 3DMotif-Dock [OPTION] <parameter>
+
+Example:
+1) PDS library Geneation:
+3DMotif-Dock -i INPUT_PDB_LIB -n 40 -1
+## This step will return a INPUT_PDB_LIB-Index file.
+
+2) Motif Docking:
+## for flexible motif.
+3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 1.0 -3
+## for stable motif.
+3DMotif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6 -3
+## Normal Solution, it takes a lot of time.
+3DMotif-Dock -m Motif_2.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.8
+
+Note: Make sure julia\MAESTER\Parallel\Python3 in your $PATH!
+
+Expected Output:
+1. INPUT-Motif-FINAL_interface_score_OUT.sc: The final socre file.
+2. INPUT-Motif-Jd2-OUT: This dir contains the final complexes of your receptor structure with the structure which is in your INPUT lib as well as matched to your motif structure.
+3. INPUT-Motif-Relax: The refined complexes for INPUT-Motif-Jd2-OUT.
+4. INPUT-Motif-Jd2-?(Target_Chainname).fasta: The sequences of matched motif structures.
+
+Input parameter:
+  -m    A pdb file to define a structure motif.
+  -i    Your Interested PDB library.
+  -r    A receptor strcuture Corresponding to your motif!
+  -d    RMSD cutoff for matching.
+  -c    Set a chain name of target, default is B.
+  -k    Don't change the chain name of target proteins, but set receptor chain to "Z".
+            NOTE: it is useful for multiple chain PDB library.
+  -f    Set a clash_score_cutoff to the filter for ugly PPI complex, or set to "unlimited". <1.64>
+            NOTE: 1.64, 2.44, 6.20. More little, more sensitive to clash.
+  -q    How many top complexes will be relax. <500>
+  -g    Motif to match with a gap in range. <"5-20">
+
+  -n    The Max number of CPU threads available for this job, default is 40.
+  -a    Path to Rosetta app, defalut is $rosetta_app
+  -b    Path to Rosetta db, defalut is $rosetta_db
+  -v    Rosetta version, static or mpi. <mpi>
+  -l    Input a PDS index list from MAESTER.
+
+Control Parameter:
+-1 Turn off except PDS Library Generation.
+-2 Turn off Rosetta_Jd2 and Rosetta_Interface_Score.
+-3 Turn off Rosetta_Relax. It is recommended for the first time to use.
+```
 
 Citation
 ----
@@ -89,4 +173,4 @@ Citation
 
 Acknowledgements
 ----
-
+We sincerely appreciate the Chinese Rosetta Community, Yuan Liu and Wei-kun Wu, who provide technical communication for this study. We also sincerely thank Joe Greener, the developer of [BioStructures](https://github.com/BioJulia/BioStructures.jl), for his help to our Julia code. We appreciate the technical support provided by the engineers of the high-performance computing cluster of ShanghaiTech University.
