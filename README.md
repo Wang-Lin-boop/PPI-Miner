@@ -173,4 +173,4 @@ Coming soon ...
 
 Acknowledgements
 ----
-We sincerely appreciate the Chinese Rosetta Community, Yuan Liu and Wei-kun Wu, who provide technical communication for this study. We also sincerely thank Joe Greener, the developer of [BioStructures](https://github.com/BioJulia/BioStructures.jl), for his help to our Julia code. We appreciate the technical support provided by the engineers of the high-performance computing cluster of ShanghaiTech University.
+We sincerely appreciate the Chinese Rosetta Community, Yuan Liu and Wei-kun Wu, who provide technical communication for this study. We also sincerely thank Joe Greener, the developer of [BioStructures](https://github.com/BioJulia/BioStructures.jl), for his help to our Julia code. We are also grateful for the support from HPC Platform of ShanghaiTech University.
