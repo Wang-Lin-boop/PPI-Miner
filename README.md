@@ -15,8 +15,17 @@ Installation
 Motif-Dock needs to be installed on the Linux system.  
 
 ## 1. Install dependent packages.  
-a. **(Required)** Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
-b. **(Required)** Intsall Julia and related packages.   
+a. **(Required)** Intsall the GNU parallel, julia and python3. 
+Parallel:  
+```
+sudo apt install parallel
+```
+Python3 (by miniconda):
+```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+```
+Julia:  
 ```  
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
 tar zxvf julia-1.5.3-linux-x86_64.tar.gz  
@@ -29,6 +38,8 @@ add BioStructures # in Julia REPL
 add PDBTools # in Julia REPL
 exit()
 ```
+b. **(Required)** Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
+
 c. **(Optional)** Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
 ```
 echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
