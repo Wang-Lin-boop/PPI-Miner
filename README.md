@@ -81,7 +81,7 @@ Please refer to [AlphaFold Processing](https://github.com/Wang-Lin-boop/AlphaFol
 Usage of 2DMotif-Dock
 ----
 
-Run the `2DMotif-Dock -h` to show the help information of 2DMotif-Dock.
+Run `2DMotif-Dock -h` to show the help information of 2DMotif-Dock.
 ```
 Usage: 2DMotif-Dock [OPTION] <parameter>
 
@@ -118,7 +118,7 @@ Rosetta parameter:
 Usage of 3DMotif-Dock
 ----
 
-Run the `3DMotif-Dock -h` to show the help information of 3DMotif-Dock.
+Run `3DMotif-Dock -h` to show the help information of 3DMotif-Dock.
 ```
 Usage: 3DMotif-Dock [OPTION] <parameter>
 
