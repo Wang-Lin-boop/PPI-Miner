@@ -16,16 +16,16 @@ Motif-Dock needs to be installed on the Linux system.
 
 ## 1. Install dependent packages.  
 &ensp;&ensp;a. _(Required)_ Intsall the GNU parallel, Julia and Python3.   
->&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Parallel:  
+>Parallel:  
 ```
 sudo apt install parallel
 ```
->&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Python3 (by miniconda):
+>Python3 (by miniconda):
 ```
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 ```
->&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Julia:  
+>Julia:  
 ```  
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
 tar zxvf julia-1.5.3-linux-x86_64.tar.gz  
