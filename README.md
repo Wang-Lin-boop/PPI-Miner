@@ -15,7 +15,7 @@ Installation
 Motif-Dock needs to be installed on the Linux system.  
 
 ## 1. Install dependent packages.  
-a. **(Required)** Intsall the GNU parallel, julia and python3. 
+a. **(Required)** Intsall the GNU parallel, julia and python3.   
 Parallel:  
 ```
 sudo apt install parallel
