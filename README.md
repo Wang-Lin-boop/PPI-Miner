@@ -1,5 +1,5 @@
 # Motif-Dock
-&ensp;&ensp;&ensp;&ensp;Motif-Dock is a protein-protein interaction (PPI) search pipeline for proteins containing **specific substructure motif (3D)** or **sequence motif (2D)**. Motif-Dock can be used to **1)** mining potential PPI partners for specific receptors, such as E3, kinase, phosphatase. **2)** searching protein scaffolds fusing specific motifs such as antigenic epitopes.  
+&ensp;&ensp;&ensp;&ensp;_Motif-Dock is a protein-protein interaction (PPI) search pipeline for proteins containing **specific substructure motif (3D)** or **sequence motif (2D)**. Motif-Dock can be used to **1)** mining potential PPI partners for specific receptors, such as E3, kinase, phosphatase. **2)** searching protein scaffolds fusing specific motifs such as antigenic epitopes._  
 
 
 Introduction
