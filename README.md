@@ -107,7 +107,8 @@ Usage of 2DMotif-Dock
 2DMotif-Dock -i ${HumanDisorderSequence70} -m <msa.fasta> -p 65 -r <receptor.pdb> -c "B" 
 ```
 
-# Expected Output of 3DMotif-Dock:  
+Expected Output of 3DMotif-Dock:  
+---
 _1. *-ddG.sc: The final socre file, which contains sequences and corresponding ddG score._   
 _2. ddG_running: The mutated complex structures._   
 
@@ -128,7 +129,8 @@ Usage of 3DMotif-Dock
 ```
 3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6
 ```
-# Expected Output of 3DMotif-Dock:  
+Expected Output of 3DMotif-Dock:  
+---
 _1. INPUT-Motif-FINAL_interface_score_OUT.sc: The final socre file._  
 _2. INPUT-Motif-Jd2-OUT: This dir contains the final complexes of your receptor structure with the structure which is in your INPUT lib as well as matched to your motif structure._  
 _3. INPUT-Motif-Relax: The refined complexes for INPUT-Motif-Jd2-OUT._  
