@@ -119,15 +119,15 @@ Run `3DMotif-Dock -h` to show the help information of 3DMotif-Dock.
 
 &ensp;&ensp; 1. Search for flexible structural motif.   
 ```
-3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 1.0 -2
+3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l ${HumanProteinPDS} -n 40 -d 1.0 -2
 ``` 
 &ensp;&ensp; 2. Search for stable structural motif.   
 ```
-3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6 -2
+3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l ${HumanProteinPDS} -n 40 -d 0.6 -2
 ```
 &ensp;&ensp; 3. Perform motif searching and optimizing the searched structure (Required rosetta).   
 ```
-3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l INPUT_PDB_LIB-Index -n 40 -d 0.6
+3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l ${HumanProteinPDS} -n 40 -d 0.6
 ```
 **Expected Output of 3DMotif-Dock:**  
 &ensp;&ensp;_1. INPUT-Motif-FINAL_interface_score_OUT.sc: The final socre file._  
