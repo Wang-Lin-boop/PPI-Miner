@@ -12,7 +12,7 @@ Introduction
 
 Installation
 ----
-Motif-Dock needs to be installed on the Linux system.  
+Motif-Dock needs to be installed on the Linux system. Webserver is available at [Motif-Dock Webserver](https://bailab.siais.shanghaitech.edu.cn/services/motif-dock).  
 
 ## 1. Install dependent packages.  
 &ensp;&ensp;a. _(Required)_ Intsall the GNU parallel, Julia and Python3.   
