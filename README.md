@@ -35,6 +35,8 @@ echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
 echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
 echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
 ```  
+d. **(Optional)** Intsall the [EMBOSS](http://emboss.open-bio.org/html/adm/ch01s01.html) packages and add to `PATH` environment variables.  
+
 ## 2. Download Motif-Dock and configure environment variables.   
 ```
 git clone https://github.com/Wang-Lin-boop/Motif-Dock/
