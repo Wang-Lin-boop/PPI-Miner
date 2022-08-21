@@ -14,13 +14,8 @@ Installation
 ----
 Motif-Dock needs to be installed on the Linux system.  
 
-**1. Install the dependent packages.**  
-a. Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
-```
-echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
-echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
-echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
-```  
+## 1. Install dependent packages.  
+a. Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
 b. Intsall Julia and related packages.   
 ```  
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
@@ -34,7 +29,13 @@ add BioStructures # in Julia REPL
 add PDBTools # in Julia REPL
 exit()
 ```
-**2. Download Motif-Dock and configure environment variables.**   
+c. (Optional) Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
+```
+echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
+echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
+echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
+```  
+## 2. Download Motif-Dock and configure environment variables.   
 ```
 git clone https://github.com/Wang-Lin-boop/Motif-Dock/
 cd Motif-Dock/scripts/
