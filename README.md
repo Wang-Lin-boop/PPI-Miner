@@ -107,6 +107,10 @@ Usage of 2DMotif-Dock
 2DMotif-Dock -i ${HumanDisorderSequence70} -m <msa.fasta> -p 65 -r <receptor.pdb> -c "B" 
 ```
 
+# Expected Output of 3DMotif-Dock:  
+_1. *-ddG.sc: The final socre file, which contains sequences and corresponding ddG score._   
+_2. ddG_running: The mutated complex structures._   
+
 Usage of 3DMotif-Dock
 ----
 
