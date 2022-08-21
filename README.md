@@ -15,7 +15,7 @@ Installation
 Motif-Dock needs to be installed on the Linux system.  
 
 ## 1. Install dependent packages.  
-&ensp;&ensp;a. **(Required)** Intsall the GNU parallel, julia and python3.   
+&ensp;&ensp;a. _(Required)_ Intsall the GNU parallel, Julia and Python3.   
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Parallel:  
 ```
 sudo apt install parallel
@@ -38,15 +38,15 @@ add BioStructures # in Julia REPL
 add PDBTools # in Julia REPL
 exit()
 ```
-&ensp;&ensp;b. **(Required)** Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
+&ensp;&ensp;b. _(Required)_ Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
 
-&ensp;&ensp;c. **(Optional)** Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
+&ensp;&ensp;c. _(Optional)_ Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
 ```
 echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
 echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
 echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
 ```  
-&ensp;&ensp;d. **(Optional)** Intsall the [EMBOSS](http://emboss.open-bio.org/html/adm/ch01s01.html) packages and add to `PATH` environment variables.  
+&ensp;&ensp;d. _(Optional)_ Intsall the [EMBOSS](http://emboss.open-bio.org/html/adm/ch01s01.html) packages and add to `PATH` environment variables.  
 
 ## 2. Download Motif-Dock and configure environment variables.   
 ```
