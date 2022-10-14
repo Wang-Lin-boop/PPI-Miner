@@ -192,26 +192,6 @@ else
 fi
 #######################################
 
-## Complex Relaxing
-#######################################
-if [ $relax_b == true ]; then
-cat << EOF >> cart2.script
-switch:cartesian
-repeat 2
-ramp_repack_min 0.02  0.01     1.0  50
-ramp_repack_min 0.250 0.01     0.5  50
-ramp_repack_min 0.550 0.01     0.0 100
-ramp_repack_min 1     0.00001  0.0 200
-accept_to_best
-endrepeat
-EOF
-  echo "NOTE: Relaxing the input complex structure!"
-  mkdir -p Rosetta_Process
-  $rosetta_app/relax.${rosetta_version}.linuxgccrelease -database ${rosetta_db} -in:file:s ${complex} -out:file:scorefile Rosetta_Porcess_relax_score.sc -out:path:pdb Rosetta_Process/ -ex1 -ex2aro -ignore_zero_occupancy false -no_nstruct_label -use_input_sc -relax:cartesian -score:weights ref2015_cart -relax:min_type lbfgs_armijo_nonmonotone -relax:script cart2.script -fa_max_dis 9.0 -out:nstruct 1 -mute all 
-  export complex=`readlink -f Rosetta_Process/$(basename ${complex})`
-fi
-#######################################
-
 if [ $Table_input == true ];then
     export Table=`readlink -f ${Table}`
 else
@@ -255,15 +235,26 @@ if [ ${seq_patt_input} == true ];then
   done
   for match_line in `grep -E ${seq_pattern} $(basename ${database%%.fasta})-line.seq`;do
     sequence_name=`echo ${match_line} | awk -F# '{print $1}'`
-    for sequence_matched in `echo ${match_line} | grep -E ${seq_pattern} -o`;do
-      if [[ ${sequence_matched} =~ [-,0-9,_,a-z,'#',%,?] ]];then
-        continue
+    sequence=`echo ${match_line} | awk -F# '{print $2}'`
+    motif_array=()
+    while sequence_matched=$(grep -Eo "${seq_pattern}" <<<"${sequence}");do 
+      if [[ ${motif_array[@]/${sequence_matched}/} == ${motif_array[@]} ]] && [[ ! ${sequence_matched} =~ [-,0-9,_,a-z,'#',%,?] ]]; then
+        motif_array=("${motif_array[@]}"  "${sequence_matched}")
       fi
+      sequence=${sequence#*${sequence_matched:0:1}}
+    done
+    for sequence_matched in ${motif_array[@]};do
       echo "${sequence_matched}  ${sequence_name}" >> Matched-Sequence_Patterns.tsv
     done
   done
-  echo "
-NOTE: the sequence pattern search results were stored in Matched-Sequence_Patterns.tsv !"
+  if [ -f Matched-Sequence_Patterns.tsv ];then
+    echo "
+  NOTE: the sequence pattern search results were stored in Matched-Sequence_Patterns.tsv !"
+  else
+    echo "
+  Error: no sequence pattern were found !"
+    exit
+  fi
 if [ ${Table} ];then
   cat ${Table} Matched-Sequence_Patterns.tsv > all_cands_for_${msa%%.fasta}-MSA_and_Sequence-Patterns.tsv
   export Table=`readlink -f all_cands_for_${msa%%.fasta})-MSA_and_Sequence-Patterns.tsv`
@@ -273,6 +264,26 @@ fi
 fi
 #######################################
 fi
+
+## Complex Relaxing
+#######################################
+if [ $relax_b == true ]; then
+cat << EOF >> cart2.script
+switch:cartesian
+repeat 2
+ramp_repack_min 0.02  0.01     1.0  50
+ramp_repack_min 0.250 0.01     0.5  50
+ramp_repack_min 0.550 0.01     0.0 100
+ramp_repack_min 1     0.00001  0.0 200
+accept_to_best
+endrepeat
+EOF
+  echo "NOTE: Relaxing the input complex structure!"
+  mkdir -p Rosetta_Process
+  $rosetta_app/relax.${rosetta_version}.linuxgccrelease -database ${rosetta_db} -in:file:s ${complex} -out:file:scorefile Rosetta_Porcess_relax_score.sc -out:path:pdb Rosetta_Process/ -ex1 -ex2aro -ignore_zero_occupancy false -no_nstruct_label -use_input_sc -relax:cartesian -score:weights ref2015_cart -relax:min_type lbfgs_armijo_nonmonotone -relax:script cart2.script -fa_max_dis 9.0 -out:nstruct 1 -mute all 
+  export complex=`readlink -f Rosetta_Process/$(basename ${complex})`
+fi
+#######################################
 
 ##  WT scoring
 #######################################
