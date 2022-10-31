@@ -45,6 +45,7 @@ Input parameter:
   -g    Motif to match with a gap in range. <"5-20">
 
   -n    The Max number of CPU threads available for this job, default is 40.
+  -T    Job Title.
   -a    Path to Rosetta app, defalut is \$rosetta_app
   -b    Path to Rosetta db, defalut is \$rosetta_db
   -v    Rosetta version, static or mpi. <mpi>
@@ -217,7 +218,7 @@ rosetta_version=mpi
 set_receptor_chainname=false
 clash_score_cutoff=1.64
 
-while getopts ":hm:i:r:d:n:a:b:p:l:c:q:w1234g:v:kf:" opt
+while getopts ":hm:i:r:d:n:a:b:p:l:c:q:w1234g:v:kf:T:" opt
 do
   case $opt in
     h)
@@ -248,6 +249,8 @@ do
         gap_len=$OPTARG;;
     f)
         clash_score_cutoff=$OPTARG;;
+    T)
+        jobbasename=$OPTARG;;
     a)
         rosetta_app=$OPTARG;;
     b)
@@ -275,7 +278,9 @@ do
     esac
 done
 
-jobbasename=`echo "$(basename ${PDBinputPath})-$(basename ${Motifpdb%%.pdb})"`
+if [ ! ${jobbasename} ];then
+    jobbasename=`echo "$(basename ${PDBinputPath})-$(basename ${Motifpdb%%.pdb})"`
+fi
 date #sdout
 echo -e "STEP: Parsing Input PDB library......\n" #sdout
 if [ "$PDBinput"x == "true"x ];then
@@ -346,6 +351,7 @@ setchainname("$Receptor")
 JULIA
         julia ParseChain.jl
         receptor_chain_name="Z"
+        rm ParseChain.jl
     else
         grep -E "^ATOM|^HETATM|^CONECT" $Receptor > ${jobbasename}-receptor.pdb
         export receptor_chain_name= 
@@ -360,7 +366,6 @@ JULIA
     if [ $complex_number == 0 ];then
         exit
     fi
-    rm ParseChain.jl
 fi
 
 function link_sc_seq(){
@@ -418,8 +423,8 @@ if [ "$JdRefine"x == "true"x ];then
     ls $jobbasename-complex | parallel -j $CPUnum $rosetta_app/score_jd2.${rosetta_version}.linuxgccrelease -database $rosetta_db -in:file:s $jobbasename-complex/{} -out:file:scorefile $jobbasename-score_jd2.sc -out:path:pdb $jobbasename-Jd2-OUT -score:weights ref2015_cart -out:pdb -ex1 -ex2 -ignore_zero_occupancy false -in:ignore_unrecognized_res true -out:mute all -treat_residues_in_these_chains_as_separate_chemical_entities "Z" -no_nstruct_label # Score_Jd2
     ls $jobbasename-Jd2-OUT | parallel -j $CPUnum $rosetta_app/InterfaceAnalyzer.${rosetta_version}.linuxgccrelease -s $jobbasename-Jd2-OUT/{} -tracer_data_print false -out:file:score_only $jobbasename-Jd2_Interface_Score.sc -add_regular_scores_to_scorefile true -out:mute all -sasa_calculator_probe_radius 1.4 -atomic_burial_cutoff 0.01 -interface ${receptor_chain_name}_${Target_ChainName} -read_only_ATOM_entries true -pack_separated true -score:weights ref2015_cart -no_nstruct_label true # Interface socre
     ex_Seq $jobbasename-Jd2-OUT/ #sdout
-    echo "FileName  MotifDock_Score  Complex_Repulsive  Interface_SASA_Total  dG_separated_Total  dG_separated/dSASAx100  dSASA_hphobic  Target_side_Score  Interface_unsat_Hbonds  Interface_Hbonds_Energy  dG_cross_Total  dG_cross/dSASAx100  Motif_Seq" > $jobbasename-JD2_interface_score_OUT.sc
-    tail -n +3 $jobbasename-Jd2_Interface_Score.sc | awk '$28 != 0 {print $42,$19/1000+$5+$40/5,$19,$10,$7,$8,$9,$40,$12,$21,$5,$6}' | parallel -j $CPUnum link_sc_seq {} $jobbasename-Jd2-OUT.fasta >> $jobbasename-JD2_interface_score_OUT.sc
+    echo "FileName  Complex_Repulsive  Interface_SASA_Total  dG_separated_Total  dG_separated/dSASAx100  dSASA_hphobic  Target_side_Score  Interface_unsat_Hbonds  Interface_Hbonds_Energy  dG_cross_Total  dG_cross/dSASAx100  Motif_Seq" > $jobbasename-JD2_interface_score_OUT.sc
+    tail -n +3 $jobbasename-Jd2_Interface_Score.sc | awk '$28 != 0 {print $42,$19,$10,$7,$8,$9,$40,$12,$21,$5,$6}' | parallel -j $CPUnum link_sc_seq {} $jobbasename-Jd2-OUT.fasta >> $jobbasename-JD2_interface_score_OUT.sc
     awk '{print $42,$29,$7}' $jobbasename-Jd2_Interface_Score.sc | tail -n +2 | sort -nk 3 | head -n $Relax_Num >> $jobbasename.Jd2.out
 fi
 
