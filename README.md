@@ -63,13 +63,13 @@ Database
 
 &ensp;&ensp;First, download the 3DPPI-Miner structure library, which may take a bit longer.  
 ```
-wget https://bailab.siais.shanghaitech.edu.cn/service/3DPPI-Miner-pds-Library.zip
-unzip 3DPPI-Miner-pds-Library.zip
-for pds in `ls 3DPPI-Miner-pds-Library`;do
-  echo "${PWD}/3DPPI-Miner-pds-Library/${pds}" >> 3DPPI-Miner-pds-Library.list
+wget https://bailab.siais.shanghaitech.edu.cn/service/3DMotif-Dock-pds-Library.zip
+unzip 3DMotif-Dock-pds-Library.zip
+for pds in `ls 3DMotif-Dock-pds-Library`;do
+  echo "${PWD}/3DMotif-Dock-pds-Library/${pds}" >> 3DMotif-Dock-pds-Library.list
 done
 echo " ## Database of 3DPPI-Miner, added by PPI-Miner, refer to https://github.com/Wang-Lin-boop/PPI-Miner/
-export HumanProteinPDS=${PWD}/3DPPI-Miner-pds-Library.list" >> ~/.bashrc
+export HumanProteinPDS=${PWD}/3DMotif-Dock-pds-Library.listt" >> ~/.bashrc
 ```
 &ensp;&ensp;Next, switch to the ``PPI-Miner/Database`` and execute the following command.
 ```
