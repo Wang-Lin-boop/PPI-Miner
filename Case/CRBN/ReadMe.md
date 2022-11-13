@@ -1,5 +1,8 @@
+receptor: CRBN_CTD_Thalidomide.pdb   
+motif: BetaHairpin.pdb   
 ```
-CRBN_CTD_Thalidomide.pdb : Receptor.
-BetaHairpin.pdb : Motif.
-CRBN_Substrates_Database.xlsx : Results.
+3DMotif-Dock -i 3DMotif-Dock-LIB.list -f "unlimited" -3  
 ```
+
+results: CRBN_Substrates_Database.xlsx  
+
