@@ -40,13 +40,14 @@ exit()
 ```
 &ensp;&ensp;b. _(Required)_ Intsall [MASTER](https://grigoryanlab.org/index.php?sec=download&soft=MASTER) packages and add to `PATH` environment variables.   
 
-&ensp;&ensp;c. _(Optional)_ Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables.  
+&ensp;&ensp;c. _(Optional)_ Intsall the [Rosetta](https://www.rosettacommons.org/docs/latest/build_documentation/Build-Documentation) packages and set up environment variables, which used to calculate the PPI binding energy. We recommend to install the Rosetta.   
+  
 ```
 echo "export rosetta_app=<path to rosetta apps>" >> ~/.bashrc
 echo "export rosetta_db=<path to rosetta database>" >> ~/.bashrc
 echo "export rosetta_version=<rosetta versions, mpi or static>" >> ~/.bashrc
 ```  
-&ensp;&ensp;d. _(Optional)_ Intsall the [EMBOSS](http://emboss.open-bio.org/html/adm/ch01s01.html) packages and add to `PATH` environment variables.  
+&ensp;&ensp;d. _(Optional)_ Intsall the [EMBOSS](http://emboss.open-bio.org/html/adm/ch01s01.html) packages and add to `PATH` environment variables, which used to search the sequences by PFM (In most cases, we recommond the sequence parttern).  
 
 ## 2. Download PPI-Miner and configure environment variables.   
 ```
