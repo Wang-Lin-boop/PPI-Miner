@@ -1,7 +1,8 @@
 Input
 ===
 - receptor: CRBN_CTD_Thalidomide.pdb   
-- motif: BetaHairpin.pdb   
+- motif: BetaHairpin.pdb     
+
 Command
 ===
 The parameters used into our case study:   
