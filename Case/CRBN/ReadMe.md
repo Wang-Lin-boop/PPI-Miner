@@ -9,10 +9,12 @@ The parameters used into our case study:
 ```
 3DMotif-Dock -i ${HumanProteinPDS} -f "unlimited" -3 -d 1.0 -r CRBN_CTD_Thalidomide.pdb -m BetaHairpin.pdb 
 ```
-If you want to re-produce the CRBN substratres database locally,  we recomond:   
+If you want to re-produce the CRBN substratres database locally,  we recommend:   
 ```
 3DMotif-Dock -i ${HumanProteinPDS} -f 1.64 -3 -d 1.0 -r CRBN_CTD_Thalidomide.pdb -m BetaHairpin.pdb 
 ```
+If you have sufficient computing resources, we recommend you relax all the human protein structures from AlphaFold DB and PDB at the frist. We believe that this will greatly improve the quality of the output structures.    
+
 
 Output
 ===
