@@ -138,7 +138,7 @@ Usage of 3DPPI-Miner
 
 Citation
 ----
-L. Wang, F.-l. Li, X.-y. Ma, Y. Cang, F. Bai, PPI-Miner: A Structure and Sequence Motif Co-Driven Protein–Protein Interaction Mining and Modeling Computational Method. _Journal of Chemical Information and Modeling_,  (__2022__).  
+L. Wang, F.-l. Li, X.-y. Ma, Y. Cang, F. Bai, [PPI-Miner: A Structure and Sequence Motif Co-Driven Protein–Protein Interaction Mining and Modeling Computational Method.](https://pubs.acs.org/doi/full/10.1021/acs.jcim.2c01033) _Journal of Chemical Information and Modeling_,  (__2022__).  
 
 Acknowledgements
 ----
