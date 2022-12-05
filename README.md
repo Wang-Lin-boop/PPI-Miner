@@ -86,6 +86,8 @@ export HumanDisorderSequence70=${PWD}/Human-Disorder70-protein.fasta" >> ~/.bash
 ```
 3DMotif-Dock -i <INPUT_PDB_LIB> -n 40 -1 
 ```
+&ensp;&ensp;You can adjust the '-c' option to change the default chainname "B" of database structures, which aim to aviod chainname conflict.
+&ensp;&ensp;For multiple chains PDB library, you can use the '-k' option during next step to change receptor chainname to "Z". 
 &ensp;&ensp;The program generates a file named INPUT_PDB_LIB-Index, which will be used in the next calculations as the database index file.  
 
 **3. Use the scripts to generate your own disorder sequences libraries.**
@@ -116,7 +118,7 @@ Usage of 2DPPI-Miner
 Usage of 3DPPI-Miner
 ----
 
-3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database, the default chainname in database is "B".__  
+3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database (default "B"). If it was, you can use the '-k' option to change receptor chainname to "Z" to aviod chainname conflict. __  
 
 &ensp;&ensp; 1. Search for flexible structural motif.   
 ```
