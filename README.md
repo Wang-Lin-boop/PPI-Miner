@@ -117,7 +117,7 @@ Usage of 3DPPI-Miner
 ----
 
 3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner.  
-__Take care!__ don't use the same chain name to your database, the default chainname in database is "B".  
+__Take care! don't use the same chain name to your database, the default chainname in database is "B".__  
 
 &ensp;&ensp; 1. Search for flexible structural motif.   
 ```
