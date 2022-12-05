@@ -118,7 +118,7 @@ Usage of 2DPPI-Miner
 Usage of 3DPPI-Miner
 ----
 
-3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database (default "B"). If it was, you can use the '-k' option to change receptor chainname to "Z" to aviod chainname conflict.__  
+3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database (default "B").__ If it was, you can use the '-k' option to change receptor chainname to "Z" to aviod chainname conflict.    
 
 &ensp;&ensp; 1. Search for flexible structural motif.   
 ```
