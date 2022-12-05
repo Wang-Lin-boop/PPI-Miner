@@ -118,7 +118,7 @@ Usage of 2DPPI-Miner
 Usage of 3DPPI-Miner
 ----
 
-3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database (default "B"). If it was, you can use the '-k' option to change receptor chainname to "Z" to aviod chainname conflict. __  
+3DMotif-Dock is the running script of 3DPPI-Miner, Run `3DMotif-Dock -h` to show the help information of 3DPPI-Miner. __Take care! don't use the same chain name to your database (default "B"). If it was, you can use the '-k' option to change receptor chainname to "Z" to aviod chainname conflict.__  
 
 &ensp;&ensp; 1. Search for flexible structural motif.   
 ```
@@ -133,7 +133,7 @@ Usage of 3DPPI-Miner
 3DMotif-Dock -m Motif_1.pdb -r Receptor.pdb -l ${HumanProteinPDS} -n 40 -d 0.6
 ```
 **Expected Output of 3DPPI-Miner:**  
-&ensp;&ensp;_1. INPUT-Motif-FINAL_interface_score_OUT.sc: The final socre file._  
+&ensp;&ensp;_1. INPUT-Motif-FINAL_interface_score_OUT.sc: The final socre file, the dG\_cross\_Total is the most recommended criteria._  
 &ensp;&ensp;_2. INPUT-Motif-Jd2-OUT: This dir contains the final complexes of your receptor structure with the structure which is in your INPUT lib as well as matched to your motif structure._  
 &ensp;&ensp;_3. INPUT-Motif-Relax: The refined complexes for INPUT-Motif-Jd2-OUT._  
 &ensp;&ensp;_4. INPUT-Motif-Jd2-?(Target_Chainname).fasta: The sequences of matched motif structures._  
