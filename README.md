@@ -70,7 +70,7 @@ for pds in `ls 3DMotif-Dock-pds-Library`;do
   echo "${PWD}/3DMotif-Dock-pds-Library/${pds}" >> 3DMotif-Dock-pds-Library.list
 done
 echo " ## Database of 3DPPI-Miner, added by PPI-Miner, refer to https://github.com/Wang-Lin-boop/PPI-Miner/
-export HumanProteinPDS=${PWD}/3DMotif-Dock-pds-Library.listt" >> ~/.bashrc
+export HumanProteinPDS=${PWD}/3DMotif-Dock-pds-Library.list" >> ~/.bashrc
 ```
 &ensp;&ensp;Next, switch to the ``PPI-Miner/Database`` and execute the following command.
 ```
